@@ -1,0 +1,88 @@
+<?php
+/**
+ * BcCsvImportCore カスタマイズ設定
+ *
+ * このファイルを setting_customize.php にリネームして使用してください。
+ * setting.php の値をここで上書きできます。
+ * setting_customize.php は .gitignore に含まれているため、
+ * リポジトリにコミットされません。
+ *
+ * @author kaburk
+ * @license MIT License
+ */
+
+$customize_config = [
+    'BcCsvImportCore' => [
+        // インポートサービスクラス（専用プラグインでオーバーライドする場合はここで差し替える）
+        'importServiceClass' => 'BcCsvImportCore\Service\SampleProductsCsvImportService',
+        // 一時CSVファイルの保持日数
+        'csvExpireDays' => 3,
+        // バッチ処理件数
+        'batchSize' => 1000,
+
+        // --- GUI表示設定 ---
+        // true にするとインポート画面で利用者が選択できる。
+        // false にすると選択UIを非表示にし、下記の defaultXxx の固定値で動作する。
+        // 用途を限定したい場合（例: 常にUTF-8のみ受け付けるシステム）は false にすること。
+
+        // オプションセクション全体を表示するか
+        'showOptionSection'    => true,
+
+        // 文字コード選択を表示するか
+        'showEncodingSelect'     => true,
+        // バリデーションモード選択を表示するか
+        'showModeSelect'         => true,
+        // インポート方式選択を表示するか
+        'showImportStrategySelect' => true,
+        // 重複データの処理方法選択を表示するか
+        'showDuplicateModeSelect' => true,
+
+        // --- 固定値（showXxx が false のときに使用される値） ---
+        // showXxx が true の場合でも、GUIの初期選択値として使われる。
+
+        // 文字コード
+        //   'auto'      : 自動判別（UTF-8 → Shift-JIS の順で試行）
+        //   'UTF-8'     : UTF-8 固定
+        //   'Shift-JIS' : Shift-JIS 固定
+        'defaultEncoding'      => 'auto',
+
+        // バリデーションモード
+        //   'strict'  : 事前確認モード。全件バリデーション後にエラー0件の場合のみ登録する
+        //   'lenient' : スキップモード。エラー行を読み飛ばして登録する
+        'defaultMode'          => 'strict',
+
+        // インポート方式
+        //   'append'  : 既存データを残したまま追記・更新する
+        //   'replace' : 登録直前に対象テーブルの既存データを全削除してから取り込む
+        'defaultImportStrategy' => 'append',
+
+        // 重複データの処理方法（重複キーは各サービスクラスの getDuplicateKey() で定義）
+        //   'skip'      : 既存レコードを変更しない
+        //   'overwrite' : 既存レコードを上書き更新する
+        //   'error'     : 重複をエラーとして報告し、登録しない
+        'defaultDuplicateMode' => 'skip',
+    ],
+
+    // 管理画面メニューのカスタマイズ例
+    // 'BcApp' => [
+    //     'adminNavigation' => [
+    //         'Contents' => [
+    //             'BcCsvImportCore' =>  null, // setting.php で定義されたナビを削除（必要に応じてここで上書きも可能）
+    //         ],
+    //         // Plugins ナビのメニューとして追加する例
+    //         'Plugins' => [
+    //             'menus' => [
+    //                 'BcCsvImportCore' => [
+    //                     'title' => __d('baser_core', 'CSVインポート'),
+    //                     'url' => [
+    //                         'Admin' => true,
+    //                         'plugin' => 'BcCsvImportCore',
+    //                         'controller' => 'csv_imports',
+    //                         'action' => 'index',
+    //                     ],
+    //                 ],
+    //             ],
+    //         ],
+    //     ],
+    // ],
+];

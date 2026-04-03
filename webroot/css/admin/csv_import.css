@@ -1,0 +1,52 @@
+body.bc-csv-import-core--busy,
+body.bc-csv-import-core--busy * {
+    cursor: progress !important;
+}
+
+.bc-csv-import-core__error-text {
+    color: #c33;
+}
+
+.bc-csv-import-core__summary-item {
+    margin-bottom: 4px;
+}
+
+.bc-csv-import-core__progress-bar {
+    height: 20px;
+    border-radius: 3px;
+    transition: width .3s, background-color .3s;
+    background: #4d9f44;
+}
+
+.bc-csv-import-core__progress-bar--validate {
+    background: #d9a321;
+}
+
+.bc-csv-import-core__progress-bar--import {
+    background: #4d9f44;
+}
+
+.bc-csv-import-core__upload-error {
+    margin: 1em 0;
+    padding: 1em 1.2em;
+    border: 1px solid #c33;
+    border-radius: 4px;
+    background: #fff6f6;
+    color: #c33;
+    white-space: pre-wrap;
+    line-height: 1.8;
+}
+
+.bc-csv-import-core__scroll-table {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.bc-csv-import-core__scroll-table .bca-table-listup__thead-th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f5f5f5;
+}
