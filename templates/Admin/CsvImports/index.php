@@ -83,18 +83,20 @@ $csrfToken = $this->request->getAttribute('csrfToken');
 <section class="bca-section" data-bca-section-type="form-group" id="js-upload-section">
     <h2 class="bca-main__heading" data-bca-heading-size="lg"><?= __d('baser_core', '新規インポート') ?></h2>
 <?php
-    $showOptionSection = \Cake\Core\Configure::read('BcCsvImportCore.showOptionSection', true);
-    $showEncoding     = \Cake\Core\Configure::read('BcCsvImportCore.showEncodingSelect', true);
-    $showMode         = \Cake\Core\Configure::read('BcCsvImportCore.showModeSelect', true);
-    $showImportStrategy = \Cake\Core\Configure::read('BcCsvImportCore.showImportStrategySelect', true);
-    $showDuplicate    = \Cake\Core\Configure::read('BcCsvImportCore.showDuplicateModeSelect', true);
-    $defaultEncoding  = \Cake\Core\Configure::read('BcCsvImportCore.defaultEncoding', 'auto');
-    $defaultMode      = \Cake\Core\Configure::read('BcCsvImportCore.defaultMode', 'strict');
-    $defaultImportStrategy = \Cake\Core\Configure::read('BcCsvImportCore.defaultImportStrategy', 'append');
-    $defaultDuplicate = \Cake\Core\Configure::read('BcCsvImportCore.defaultDuplicateMode', 'skip');
-    $encodingLabels = ['auto' => '自動判別（推奨）', 'UTF-8' => 'UTF-8', 'Shift-JIS' => 'Shift-JIS'];
-    $modeLabels     = ['strict' => '事前確認モード', 'lenient' => 'スキップモード'];
-    $strategyLabels = ['append' => '追記', 'replace' => '全件入れ替え'];
+    // コントローラーの resolveUiSettings() から渡される view 変数を使用する
+    // 未設定時のフォールバックのみここで定義
+    $showOptionSection    = $showOptionSection    ?? true;
+    $showEncoding         = $showEncoding         ?? true;
+    $showMode             = $showMode             ?? true;
+    $showImportStrategy   = $showImportStrategy   ?? true;
+    $showDuplicate        = $showDuplicate        ?? true;
+    $defaultEncoding      = $defaultEncoding      ?? 'auto';
+    $defaultMode          = $defaultMode          ?? 'strict';
+    $defaultImportStrategy = $defaultImportStrategy ?? 'append';
+    $defaultDuplicate     = $defaultDuplicate     ?? 'skip';
+    $encodingLabels  = ['auto' => '自動判別（推奨）', 'UTF-8' => 'UTF-8', 'Shift-JIS' => 'Shift-JIS'];
+    $modeLabels      = ['strict' => '事前確認モード', 'lenient' => 'スキップモード'];
+    $strategyLabels  = ['append' => '追記', 'replace' => '全件入れ替え'];
     $duplicateLabels = ['skip' => 'スキップ', 'overwrite' => '上書き', 'error' => 'エラー'];
 ?>
     <table class="form-table bca-form-table" data-bca-table-type="type2">

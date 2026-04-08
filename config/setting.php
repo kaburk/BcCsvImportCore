@@ -26,6 +26,7 @@ $config = [
 
         // 文字コード選択を表示するか
         'showEncodingSelect'   => true,
+        // バリデーションモード選択を表示するか
         'showModeSelect'         => true,
         // インポート方式選択を表示するか（追記 / 全件入れ替え）
         'showImportStrategySelect' => true,

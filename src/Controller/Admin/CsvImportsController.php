@@ -6,6 +6,7 @@ use BaserCore\Controller\Admin\BcAdminAppController;
 use BcCsvImportCore\Service\Admin\CsvImportAdminService;
 use BcCsvImportCore\Service\Admin\CsvImportAdminServiceInterface;
 use BcCsvImportCore\Service\CsvImportServiceInterface;
+use Cake\Core\Configure;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\Log\Log;
@@ -93,7 +94,42 @@ class CsvImportsController extends BcAdminAppController
      */
     public function index(): void
     {
-        $this->set($this->adminService->getViewVarsForIndex());
+        $this->set(array_merge(
+            $this->adminService->getViewVarsForIndex(),
+            $this->resolveUiSettings()
+        ));
+    }
+
+    /**
+     * プラグイン固有の UI 設定を解決して view 変数として返す
+     *
+     * 自プラグイン名のキーを優先し、未設定 (null) の場合は BcCsvImportCore にフォールバックする。
+     * これにより複数の派生プラグインを同時有効化しても Configure が衝突しない。
+     *
+     * @return array
+     */
+    private function resolveUiSettings(): array
+    {
+        $pluginName = $this->plugin ?? 'BcCsvImportCore';
+        $cfg = function (string $key, mixed $default) use ($pluginName): mixed {
+            $val = Configure::read($pluginName . '.' . $key);
+            if ($val !== null) {
+                return $val;
+            }
+            return Configure::read('BcCsvImportCore.' . $key, $default);
+        };
+
+        return [
+            'showOptionSection'     => $cfg('showOptionSection', true),
+            'showEncoding'          => $cfg('showEncodingSelect', true),
+            'showMode'              => $cfg('showModeSelect', true),
+            'showImportStrategy'    => $cfg('showImportStrategySelect', true),
+            'showDuplicate'         => $cfg('showDuplicateModeSelect', true),
+            'defaultEncoding'       => $cfg('defaultEncoding', 'auto'),
+            'defaultMode'           => $cfg('defaultMode', 'strict'),
+            'defaultImportStrategy' => $cfg('defaultImportStrategy', 'append'),
+            'defaultDuplicate'      => $cfg('defaultDuplicateMode', 'skip'),
+        ];
     }
 
     /**
