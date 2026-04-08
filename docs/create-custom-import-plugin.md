@@ -368,48 +368,63 @@ return 'order_no';
 
 ### 4. 設定を差し替える
 
-`config/setting_customize.php` で `importServiceClass` を差し替えます。
+#### UI 表示制御（派生プラグインの `config/setting.php`）
+
+UI表示設定（`showXxx` / `defaultXxx`）は `BcCsvImportCore.*` ではなく、
+**自プラグインのキー**で `config/setting.php` に記述してください。
+
+複数の派生プラグインを同時有効化する場合、`BcCsvImportCore.*` を上書きし合うとロード順によって設定が踏みにじられるためです。
+
+`CsvImportsController::resolveUiSettings()` は自プラグインのキーを優先し、未設定の場合は `BcCsvImportCore.*` にフォールバックします。
 
 ```php
-$customize_config = [
-    'BcCsvImportCore' => [
-        'importServiceClass' => 'MyPlugin\Service\SampleOrdersCsvImportService',
-    ],
-];
-```
-
-例えば「運用担当には選択肢を見せず、常に strict + append + skip で動かしたい」場合は次のように固定します。
-
-```php
-$customize_config = [
-    'BcCsvImportCore' => [
-        'importServiceClass' => 'MyPlugin\Service\SampleOrdersCsvImportService',
-        'showOptionSection' => false,   // オプションアコーディオン自体を非表示
-        'defaultMode' => 'strict',
-        'defaultImportStrategy' => 'append',
+// MyPlugin/config/setting.php
+return [
+    'BcApp' => [ /* メニュー登録 */ ],
+    'MyPlugin' => [
+        // UI を非表示にし、常に strict + append + skip で動作させる例
+        'showOptionSection'    => false,   // オプションアコーディオン自体を非表示
+        'defaultMode'          => 'strict',
+        'defaultImportStrategy'=> 'append',
         'defaultDuplicateMode' => 'skip',
     ],
 ];
 ```
 
-`showOptionSection` を `false` にするとオプションアコーディオン全体が非表示になります。
-この場合でも各 `defaultXxx` の値が hidden input として渡されるため、処理は正常に動作します。
-
-項目ごとに個別に非表示にしたい場合は `showOptionSection` を `true` のまま、各 `showXxx` を `false` にします。
+横断の別プラグイン（`AnotherPlugin`）が別項目を固定していても競合しない。
 
 ```php
-$customize_config = [
-    'BcCsvImportCore' => [
-        'importServiceClass' => 'MyPlugin\Service\SampleOrdersCsvImportService',
-        'showModeSelect' => false,
-        'defaultMode' => 'strict',
-        'showImportStrategySelect' => false,
-        'defaultImportStrategy' => 'append',
+// AnotherPlugin/config/setting.php
+return [
+    'AnotherPlugin' => [
+        'showModeSelect'          => false,
+        'defaultMode'             => 'lenient',
+        'showImportStrategySelect'=> false,
+        'defaultImportStrategy'   => 'replace',
     ],
 ];
 ```
 
-この方式は、業務運用で誤操作を減らしたい場合に有効です。
+`showOptionSection` を `false` にするとオプションアコーディオン全体が非表示になりますが、
+各 `defaultXxx` の値は hidden input として送信されるため処理は正常に動作します。
+
+項目ごとに個別に非表示にしたい場合は `showOptionSection` を `true` のまま、各 `showXxx` を `false` にします。
+
+#### BcCsvImportCore 全体のプロジェクト共通設定（`setting_customize.php`）
+
+`batchSize` や `csvExpireDays` などプロジェクト全体に共通の設定は、`BcCsvImportCore/config/setting_customize.php` で上書きします。
+
+```php
+$customize_config = [
+    'BcCsvImportCore' => [
+        'csvExpireDays' => 7,    // ファイル保持日数を延長
+        'batchSize'     => 500,  // 1バッチの処理件数を減らす
+    ],
+];
+```
+
+> **注意:** `showXxx` / `defaultXxx` を `BcCsvImportCore.*` で設定しても、派生プラグイン側に同名キーがあればそちらが優先されます。
+> `BcCsvImportCore` のテンプレートを直接使う場合（派生プラグインのキーなし）は Core 側の設定がそのまま使われます。
 
 ### 5. テンプレートCSVを確認する
 
@@ -544,9 +559,12 @@ ORD-0002,佐藤花子,3000,new,2026-04-01 10:10:00
 1. 取り込み先テーブル migration
 2. Table のバリデーション
 3. `CsvImportService` 継承クラス
-4. `setting_customize.php` での `importServiceClass` 差し替え
+4. 専用コントローラー（`createImportService()` をオーバーライドしてサービスを返す）
 
 この4点が揃えば、管理画面やジョブ機構は BcCsvImportCore をそのまま流用できます。
+
+UI 表示の制御（`showXxx` / `defaultXxx`）は、自プラグインの `config/setting.php` の  
+**自プラグイン名キー**（例: `MyPlugin.*`）に追記するだけです。`BcCsvImportCore.*` は上書きしないでください。
 
 ## テストCSV生成コマンドの付け方
 
