@@ -25,11 +25,15 @@
                 headers: { 'X-CSRF-Token': csrfToken },
                 body,
             });
-            if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+            if (!response.headers.get('content-type')?.includes('application/json')) {
                 const text = await response.text();
                 throw new Error('Server error (' + response.status + '): ' + text.substring(0, 200));
             }
-            return response.json();
+            const json = await response.json();
+            if (!response.ok) {
+                throw new Error(json.message || 'Server error (' + response.status + ')');
+            }
+            return json;
         }
 
         function formatNumber(value) {
@@ -322,7 +326,14 @@
                         headers: { 'X-CSRF-Token': csrfToken },
                         body: formData,
                     });
+                    if (!response.headers.get('content-type')?.includes('application/json')) {
+                        const text = await response.text();
+                        throw new Error('Server error (' + response.status + '): ' + text.substring(0, 200));
+                    }
                     const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Server error (' + response.status + ')');
+                    }
                     if (!data.job?.token) {
                         showUploadError(data.message || 'アップロードに失敗しました。');
                         startButton.disabled = false;

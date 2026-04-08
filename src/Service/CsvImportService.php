@@ -197,7 +197,18 @@ abstract class CsvImportService implements CsvImportServiceInterface
         foreach ($rows as $i => $row) {
             $rowNumber = $baseProcessed + $i + 2; // ヘッダ行を考慮して+2
             $data = array_combine($headers, array_pad($row, count($headers), null));
-            $entity = $this->buildEntity($data);
+            try {
+                $entity = $this->buildEntity($data);
+            } catch (\Throwable $e) {
+                $batchErrors[] = [
+                    'row' => $rowNumber,
+                    'field' => '_build',
+                    'label' => 'データ変換',
+                    'message' => $e->getMessage(),
+                    'data' => $row,
+                ];
+                continue;
+            }
             if ($entity->hasErrors()) {
                 foreach ($entity->getErrors() as $field => $fieldErrors) {
                     foreach ($fieldErrors as $message) {
@@ -320,7 +331,19 @@ abstract class CsvImportService implements CsvImportServiceInterface
             foreach ($rows as $i => $row) {
                 $rowNumber = $baseProcessed + $i + 2;
                 $data = $candidateData[$i];
-                $entity = $this->buildEntity($data);
+                try {
+                    $entity = $this->buildEntity($data);
+                } catch (\Throwable $e) {
+                    $skipCount++;
+                    $batchErrors[] = [
+                        'row' => $rowNumber,
+                        'field' => '_build',
+                        'label' => 'データ変換',
+                        'message' => $e->getMessage(),
+                        'data' => $row,
+                    ];
+                    continue;
+                }
 
                 // バリデーションエラーチェック
                 if ($entity->hasErrors()) {
@@ -856,7 +879,7 @@ abstract class CsvImportService implements CsvImportServiceInterface
         }
 
         foreach ($errors as $error) {
-            fwrite($handle, json_encode($error, JSON_UNESCAPED_UNICODE) . PHP_EOL);
+            fwrite($handle, json_encode($error, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) . PHP_EOL);
         }
         fclose($handle);
     }

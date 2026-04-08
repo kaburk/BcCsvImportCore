@@ -310,7 +310,7 @@ class CsvImportsController extends BcAdminAppController
         return $this->response
             ->withStatus($status)
             ->withType('application/json')
-            ->withStringBody(json_encode($data, JSON_UNESCAPED_UNICODE));
+            ->withStringBody(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE));
     }
 
 }

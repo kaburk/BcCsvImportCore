@@ -37,6 +37,11 @@ class BcCsvImportCorePlugin extends BcPlugin
                 'scopes' => ['csv_import'],
             ]);
         }
+
+        $tmpDir = TMP . 'csv_imports' . DS;
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
     }
 
     /**
