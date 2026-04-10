@@ -103,10 +103,10 @@ $csrfToken = $this->request->getAttribute('csrfToken');
         <tbody>
         <tr>
             <th class="col-head bca-form-table__label">
-              <?= __d('baser_core', 'CSVファイル') ?> <span class="bca-label" data-bca-label-type="required"><?= __d('baser_core', '必須') ?></span>
+              <?= $this->BcAdminForm->label('csv_file', __d('baser_core', 'CSVファイル') . ' <span class="bca-label" data-bca-label-type="required">' . __d('baser_core', '必須') . '</span>', ['escape' => false]) ?>
             </th>
             <td class="col-input bca-form-table__input">
-                <input type="file" id="js-csv-file" accept=".csv" class="bca-input__file">
+                <input type="file" id="csv-file" accept=".csv" class="bca-input__file">
                 <p class="bca-form__note">
                     <?= __d('baser_core', 'UTF-8 または Shift-JIS 形式のCSVファイルをアップロードしてください。') ?>
                 </p>
@@ -149,80 +149,88 @@ $csrfToken = $this->request->getAttribute('csrfToken');
                 <tbody>
                 <tr>
                     <th class="col-head bca-form-table__label">
-                      <?= __d('baser_core', '文字コード') ?>
+                          <?= $this->BcAdminForm->label('encoding', __d('baser_core', '文字コード')) ?>
                     </th>
                     <td class="col-input bca-form-table__input">
                         <?php if ($showEncoding): ?>
-                            <span class="bca-select">
-                                <select id="js-encoding" class="bca-select__select">
-                                    <option value="auto"<?= $defaultEncoding === 'auto' ? ' selected' : '' ?>><?= __d('baser_core', '自動判別（推奨）') ?></option>
-                                    <option value="UTF-8"<?= $defaultEncoding === 'UTF-8' ? ' selected' : '' ?>>UTF-8</option>
-                                    <option value="Shift-JIS"<?= $defaultEncoding === 'Shift-JIS' ? ' selected' : '' ?>>Shift-JIS</option>
-                                </select>
-                            </span>
+                                <?= $this->BcAdminForm->control('encoding', [
+                                    'type' => 'select',
+                                    'id' => 'encoding',
+                                    'label' => false,
+                                    'options' => ['auto' => __d('baser_core', '自動判別（推奨）'), 'UTF-8' => 'UTF-8', 'Shift-JIS' => 'Shift-JIS'],
+                                    'value' => $defaultEncoding,
+                                    'empty' => false,
+                                ]) ?>
                         <?php else: ?>
-                            <input type="hidden" id="js-encoding" value="<?= h($defaultEncoding) ?>">
+                                <?= $this->BcAdminForm->hidden('encoding', ['value' => $defaultEncoding, 'id' => 'encoding']) ?>
                             <span class="bca-badge"><?= h($encodingLabels[$defaultEncoding] ?? $defaultEncoding) ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
                     <th class="col-head bca-form-table__label">
-                      <?= __d('baser_core', 'バリデーションモード') ?>
+                          <?= $this->BcAdminForm->label('mode', __d('baser_core', 'バリデーションモード')) ?>
                     </th>
                     <td class="col-input bca-form-table__input">
                         <?php if ($showMode): ?>
-                            <span class="bca-radio-group">
-                                <span class="bca-radio">
-                                    <input type="radio" id="js-mode-strict" class="bca-radio__input" name="mode" value="strict"<?= $defaultMode === 'strict' ? ' checked' : '' ?>>
-                                    <label for="js-mode-strict" class="bca-radio__label"><?= __d('baser_core', '事前確認モード（全件バリデーション → エラー0件なら登録）') ?></label>
-                                </span>
-                                <br>
-                                <span class="bca-radio">
-                                    <input type="radio" id="js-mode-lenient" class="bca-radio__input" name="mode" value="lenient"<?= $defaultMode === 'lenient' ? ' checked' : '' ?>>
-                                    <label for="js-mode-lenient" class="bca-radio__label"><?= __d('baser_core', 'スキップモード（エラー行を飛ばして登録）') ?></label>
-                                </span>
-                            </span>
+                                <?= $this->BcAdminForm->control('mode', [
+                                    'type' => 'radio',
+                                    'options' => [
+                                        'strict' => __d('baser_core', '事前確認モード（全件バリデーション → エラー0件なら登録）'),
+                                        'lenient' => __d('baser_core', 'スキップモード（エラー行を飛ばして登録）'),
+                                    ],
+                                    'value' => $defaultMode,
+                                ]) ?>
                         <?php else: ?>
-                            <input type="hidden" name="mode" value="<?= h($defaultMode) ?>">
+                                <?= $this->BcAdminForm->hidden('mode', ['value' => $defaultMode]) ?>
                             <span class="bca-badge"><?= h($modeLabels[$defaultMode] ?? $defaultMode) ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
                     <th class="col-head bca-form-table__label">
-                      <?= __d('baser_core', 'インポート方式') ?>
+                          <?= $this->BcAdminForm->label('import_strategy', __d('baser_core', 'インポート方式')) ?>
                     </th>
                     <td class="col-input bca-form-table__input">
                         <?php if ($showImportStrategy): ?>
-                            <span class="bca-select">
-                                <select id="js-import-strategy" class="bca-select__select">
-                                    <option value="append"<?= $defaultImportStrategy === 'append' ? ' selected' : '' ?>><?= __d('baser_core', '追記（既存データを残す）') ?></option>
-                                    <option value="replace"<?= $defaultImportStrategy === 'replace' ? ' selected' : '' ?>><?= __d('baser_core', '全件入れ替え（登録直前に既存データを全削除）') ?></option>
-                                </select>
-                            </span>
+                                <?= $this->BcAdminForm->control('import_strategy', [
+                                    'type' => 'select',
+                                    'id' => 'import-strategy',
+                                    'label' => false,
+                                    'options' => [
+                                        'append' => __d('baser_core', '追記（既存データを残す）'),
+                                        'replace' => __d('baser_core', '全件入れ替え（登録直前に既存データを全削除）'),
+                                    ],
+                                    'value' => $defaultImportStrategy,
+                                    'empty' => false,
+                                ]) ?>
                             <p class="bca-form__note"><?= __d('baser_core', '全件入れ替えは破壊的操作です。strict では検証エラー時に削除されません。') ?></p>
                         <?php else: ?>
-                            <input type="hidden" id="js-import-strategy" value="<?= h($defaultImportStrategy) ?>">
+                                <?= $this->BcAdminForm->hidden('import_strategy', ['value' => $defaultImportStrategy, 'id' => 'import-strategy']) ?>
                             <span class="bca-badge"><?= h($strategyLabels[$defaultImportStrategy] ?? $defaultImportStrategy) ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
                     <th class="col-head bca-form-table__label">
-                      <?= __d('baser_core', '重複データの処理') ?>
+                          <?= $this->BcAdminForm->label('duplicate_mode', __d('baser_core', '重複データの処理')) ?>
                     </th>
                     <td class="col-input bca-form-table__input">
                         <?php if ($showDuplicate): ?>
-                            <span class="bca-select">
-                                <select id="js-duplicate-mode" class="bca-select__select">
-                                    <option value="skip"<?= $defaultDuplicate === 'skip' ? ' selected' : '' ?>><?= __d('baser_core', 'スキップ（既存データを変更しない）') ?></option>
-                                    <option value="overwrite"<?= $defaultDuplicate === 'overwrite' ? ' selected' : '' ?>><?= __d('baser_core', '上書き（既存データを更新する）') ?></option>
-                                    <option value="error"<?= $defaultDuplicate === 'error' ? ' selected' : '' ?>><?= __d('baser_core', 'エラー（重複をエラーとして報告する）') ?></option>
-                                </select>
-                            </span>
+                                <?= $this->BcAdminForm->control('duplicate_mode', [
+                                    'type' => 'select',
+                                    'id' => 'duplicate-mode',
+                                    'label' => false,
+                                    'options' => [
+                                        'skip' => __d('baser_core', 'スキップ（既存データを変更しない）'),
+                                        'overwrite' => __d('baser_core', '上書き（既存データを更新する）'),
+                                        'error' => __d('baser_core', 'エラー（重複をエラーとして報告する）'),
+                                    ],
+                                    'value' => $defaultDuplicate,
+                                    'empty' => false,
+                                ]) ?>
                         <?php else: ?>
-                            <input type="hidden" id="js-duplicate-mode" value="<?= h($defaultDuplicate) ?>">
+                                <?= $this->BcAdminForm->hidden('duplicate_mode', ['value' => $defaultDuplicate, 'id' => 'duplicate-mode']) ?>
                             <span class="bca-badge"><?= h($duplicateLabels[$defaultDuplicate] ?? $defaultDuplicate) ?></span>
                         <?php endif; ?>
                     </td>
@@ -231,10 +239,10 @@ $csrfToken = $this->request->getAttribute('csrfToken');
             </table>
         </div>
     <?php else: ?>
-        <input type="hidden" id="js-encoding" value="<?= h($defaultEncoding) ?>">
-        <input type="hidden" name="mode" value="<?= h($defaultMode) ?>">
-        <input type="hidden" id="js-import-strategy" value="<?= h($defaultImportStrategy) ?>">
-        <input type="hidden" id="js-duplicate-mode" value="<?= h($defaultDuplicate) ?>">
+        <?= $this->BcAdminForm->hidden('encoding', ['value' => $defaultEncoding, 'id' => 'encoding']) ?>
+        <?= $this->BcAdminForm->hidden('mode', ['value' => $defaultMode]) ?>
+        <?= $this->BcAdminForm->hidden('import_strategy', ['value' => $defaultImportStrategy, 'id' => 'import-strategy']) ?>
+        <?= $this->BcAdminForm->hidden('duplicate_mode', ['value' => $defaultDuplicate, 'id' => 'duplicate-mode']) ?>
     <?php endif; ?>
 
     <?php if (!empty($historyJobs)): ?>
@@ -252,9 +260,12 @@ $csrfToken = $this->request->getAttribute('csrfToken');
         <div class="bca-collapse" id="csvImportHistoryBody" data-bca-state="" style="display:none;">
             <section class="bca-section" data-bca-section-type="form-group" id="js-history-section">
                 <div class="bc-csv-import-core__scroll-table">
-                <table class="bca-table-listup">
+                <table class="bca-table-listup" id="js-history-table">
                     <thead class="bca-table-listup__thead">
                     <tr>
+                        <th class="bca-table-listup__thead-th" style="width:2.5rem;">
+                            <input type="checkbox" id="js-history-check-all" title="<?= __d('baser_core', 'すべて選択') ?>">
+                        </th>
                         <th class="bca-table-listup__thead-th"><?= __d('baser_core', '作成日時') ?></th>
                         <th class="bca-table-listup__thead-th"><?= __d('baser_core', '終了日時') ?></th>
                         <th class="bca-table-listup__thead-th"><?= __d('baser_core', '状態') ?></th>
@@ -264,9 +275,12 @@ $csrfToken = $this->request->getAttribute('csrfToken');
                         <th class="bca-table-listup__thead-th"><?= __d('baser_core', '操作') ?></th>
                     </tr>
                     </thead>
-                    <tbody class="bca-table-listup__tbody">
+                    <tbody class="bca-table-listup__tbody" id="js-history-tbody">
                     <?php foreach ($historyJobs as $job): ?>
-                        <tr>
+                        <tr data-job-token="<?= h($job->job_token) ?>">
+                            <td class="bca-table-listup__tbody-td">
+                                <input type="checkbox" class="js-history-check" value="<?= h($job->job_token) ?>">
+                            </td>
                             <td class="bca-table-listup__tbody-td"><?= h($job->created) ?></td>
                             <td class="bca-table-listup__tbody-td"><?= h($job->ended_at ?? $job->modified ?? '-') ?></td>
                             <td class="bca-table-listup__tbody-td"><?= h($job->summary_label ?? '') ?></td>
@@ -297,6 +311,15 @@ $csrfToken = $this->request->getAttribute('csrfToken');
                     <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
+                <div class="bca-actions" id="js-history-bulk-actions">
+                    <div class="bca-actions__before"></div>
+                    <div class="bca-actions__main">
+                        <button type="button" id="js-history-delete-all-btn" class="bca-btn bca-actions__item" data-bca-btn-type="delete" disabled>
+                            <?= __d('baser_core', '選択した履歴を削除') ?>
+                        </button>
+                    </div>
+                    <div class="bca-actions__sub"></div>
                 </div>
             </section>
         </div>

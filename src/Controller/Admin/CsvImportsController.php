@@ -52,6 +52,7 @@ class CsvImportsController extends BcAdminAppController
             'status',
             'cancel',
             'delete',
+            'delete_all',
         ]);
 
         $this->importService = $this->createImportService();
@@ -298,6 +299,31 @@ class CsvImportsController extends BcAdminAppController
         } catch (Throwable $e) {
             return $this->_json(['message' => __d('baser_core', 'ジョブが見つかりません。')], 404);
         }
+    }
+
+    /**
+     * [AJAX] ジョブの一括削除
+     *
+     * @return Response
+     */
+    public function delete_all(): Response
+    {
+        $this->request->allowMethod('post');
+
+        $tokens = (array) $this->request->getData('tokens');
+        $errors = [];
+        foreach ($tokens as $token) {
+            try {
+                $this->importService->deleteJob((string) $token);
+            } catch (Throwable $e) {
+                $errors[] = $token;
+            }
+        }
+
+        if ($errors) {
+            return $this->_json(['message' => implode(', ', $errors) . ' の削除に失敗しました。'], 500);
+        }
+        return $this->_json(['result' => true]);
     }
 
     /**

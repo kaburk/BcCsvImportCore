@@ -38,7 +38,7 @@ abstract class AbstractGenerateTestCsvCommand extends Command
 
     /**
      * 出力 CSV ファイル名のプレフィックス
-     * 例: 'import_test_', 'import_orders_', 'import_blog_posts_'
+     * 例: 'import_test_', 'import_sample_orders_', 'import_blog_posts_'
      */
     abstract protected function getFilenamePrefix(): string;
 

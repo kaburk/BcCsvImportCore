@@ -8,7 +8,7 @@
         const adminBase = config.dataset.adminBase || '';
         const csrfToken = config.dataset.csrfToken || '';
         const batchSize = Number(config.dataset.batchSize || 1000);
-        const blogContentSelect = document.getElementById('js-blog-content-id');
+        const blogContentSelect = document.getElementById('blog-content-id');
         const downloadPostsButton = document.getElementById('js-download-posts-btn');
 
         let currentToken = null;
@@ -206,6 +206,34 @@
             cleanupTableSection(row.closest('section'));
         }
 
+        function updateBulkDeleteButton() {
+            const btn = document.getElementById('js-history-delete-all-btn');
+            if (!btn) return;
+            btn.disabled = document.querySelectorAll('.js-history-check:checked').length === 0;
+        }
+
+        async function deleteAllJobs(tokens) {
+            const body = new FormData();
+            tokens.forEach((t) => body.append('tokens[]', t));
+            const response = await fetch(adminBase + '/delete_all', {
+                method: 'POST',
+                headers: { 'X-CSRF-Token': csrfToken },
+                body,
+            });
+            if (!response.ok) {
+                const json = await response.json().catch(() => ({}));
+                throw new Error(json.message || 'Server error (' + response.status + ')');
+            }
+            const tbody = document.getElementById('js-history-tbody');
+            if (tbody) {
+                tokens.forEach((t) => {
+                    const row = tbody.querySelector('tr[data-job-token="' + CSS.escape(t) + '"]');
+                    if (row) row.remove();
+                });
+                cleanupTableSection(tbody.closest('section'));
+            }
+        }
+
         async function startImport(token, total, mode, importStrategy, resumeOffset, resumePhase) {
             currentToken = token;
             cancelled = false;
@@ -288,7 +316,7 @@
         const startButton = document.getElementById('js-start-btn');
         if (startButton) {
             startButton.addEventListener('click', async function () {
-                const fileInput = document.getElementById('js-csv-file');
+                const fileInput = document.getElementById('csv-file');
                 if (blogContentSelect && !blogContentSelect.value) {
                     showUploadError('インポート先のブログを選択してください。');
                     return;
@@ -299,9 +327,9 @@
                 }
 
                 const mode = (document.querySelector('input[name="mode"]:checked') || document.querySelector('input[name="mode"]'))?.value || 'strict';
-                const encoding = document.getElementById('js-encoding').value;
-                const importStrategy = document.getElementById('js-import-strategy').value;
-                const duplicateMode = document.getElementById('js-duplicate-mode').value;
+                const encoding = document.getElementById('encoding').value;
+                const importStrategy = document.getElementById('import-strategy').value;
+                const duplicateMode = document.getElementById('duplicate-mode').value;
 
                 if (!confirmReplaceImport(mode, importStrategy, false)) {
                     return;
@@ -416,11 +444,54 @@
             button.addEventListener('click', async function () {
                 try {
                     await deleteJob(button.dataset.token, button.closest('tr'), button.dataset.status || 'pending');
+                    updateBulkDeleteButton();
                 } catch (error) {
                     window.alert('ジョブ削除に失敗しました: ' + (error.message || 'エラーが発生しました。'));
                 }
             });
         });
+
+        // 全選択チェックボックス
+        const checkAll = document.getElementById('js-history-check-all');
+        if (checkAll) {
+            checkAll.addEventListener('change', function () {
+                document.querySelectorAll('.js-history-check').forEach((cb) => {
+                    cb.checked = checkAll.checked;
+                });
+                updateBulkDeleteButton();
+            });
+        }
+
+        // 個別チェックボックス（tbody イベント委譲）
+        const historyTbody = document.getElementById('js-history-tbody');
+        if (historyTbody) {
+            historyTbody.addEventListener('change', function (e) {
+                if (e.target.classList.contains('js-history-check')) {
+                    updateBulkDeleteButton();
+                    if (!e.target.checked && checkAll) checkAll.checked = false;
+                }
+            });
+        }
+
+        // 一括削除ボタン
+        const deleteAllBtn = document.getElementById('js-history-delete-all-btn');
+        if (deleteAllBtn) {
+            deleteAllBtn.addEventListener('click', async function () {
+                const tokens = Array.from(document.querySelectorAll('.js-history-check:checked')).map((cb) => cb.value);
+                if (tokens.length === 0) return;
+                if (!window.confirm(tokens.length + ' 件の履歴を削除しますか？')) return;
+                deleteAllBtn.disabled = true;
+                try {
+                    await deleteAllJobs(tokens);
+                    if (checkAll) checkAll.checked = false;
+                    updateBulkDeleteButton();
+                } catch (error) {
+                    window.alert('削除に失敗しました: ' + (error.message || 'エラーが発生しました。'));
+                    deleteAllBtn.disabled = false;
+                    updateBulkDeleteButton();
+                }
+            });
+        }
 
         cleanupPendingSection();
     }
