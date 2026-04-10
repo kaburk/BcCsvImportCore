@@ -583,4 +583,4 @@ bin/cake MyPlugin.generate_test_csv --sizes=10k,100k --errors=5
 - 出力CSVは UTF-8 BOM 付き
 
 ファイル名プレフィックスは、対象がすぐ分かる名前にしておくと運用しやすいです。
-例: `import_products_`, `import_orders_`, `import_sample_order_details_`
+例: `import_sample_products_`, `import_sample_orders_`, `import_sample_order_details_`
