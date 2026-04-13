@@ -11,10 +11,20 @@ $config = [
         // BcCsvImportSampleProducts など、独自プラグインの setting.php で差し替える。
         // BcCsvImportCore 単体では null（未設定）のため、必ず差し替えプラグインを有効化すること。
         'importServiceClass' => null,
-        // 一時CSVファイルの保持日数
+
+        // 一時 CSV ファイル・ジョブレコードの保持日数
+        // この日数が経過したジョブは cleanupExpiredJobs() で削除される
+        // cleanupExpiredJobs() の定期実行（cron 等）は未実装
         'csvExpireDays' => 3,
-        // バッチ処理件数
+
+        // AJAX バッチ処理の 1 回あたりの処理件数
+        // 大きくすると 1 リクエストあたりの処理が増えるが、タイムアウトリスクも上がる
+        // レンタルサーバなど低スペック環境では小さくする（例: 100〜500）
         'batchSize' => 1000,
+
+        // 文字コード自動判別で読み込むサンプルバイト数
+        // 大きくするほど検出精度が上がるが、巨大 CSV の先頭読み込みコストが増える
+        'encodingSniffBytes' => 8192,
 
         // --- GUI表示設定 ---
         // true にするとインポート画面で利用者が選択できる。

@@ -412,8 +412,9 @@ abstract public function buildEntity(array $row): EntityInterface;
 
 ## 将来対応候補
 
-- ジョブ履歴一覧画面
-- ログ画面閲覧
-- エラーCSV生成のストリーミング化
-- バルク insert / bulk upsert による更なる高速化
-- サービスごとの削除戦略オーバーライド
+- [ ] **ジョブクリーンアップの定期実行** — `cleanupExpiredJobs()` は実装済みだが呼び出し元（cron / Cake Shell）が未実装。`csvExpireDays` を超えたジョブ・CSV ファイルを自動削除する `bin/cake BcCsvImportCore.cleanup` コマンドを追加予定
+- [ ] ジョブ履歴一覧画面
+- [ ] ログ画面閲覧
+- [ ] エラー CSV 生成のストリーミング化
+- [ ] バルク insert / bulk upsert による更なる高速化
+- [ ] サービスごとの削除戦略オーバーライド

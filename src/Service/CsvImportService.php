@@ -942,7 +942,8 @@ abstract class CsvImportService implements CsvImportServiceInterface
      */
     public function detectEncoding(string $csvPath): string
     {
-        $sample = file_get_contents($csvPath, false, null, 0, 8192);
+        $sniffBytes = (int) Configure::read('BcCsvImportCore.encodingSniffBytes', 8192);
+        $sample = file_get_contents($csvPath, false, null, 0, $sniffBytes);
         if ($sample === false) {
             return 'UTF-8';
         }
