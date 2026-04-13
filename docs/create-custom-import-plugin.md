@@ -3,6 +3,8 @@
 この文書は、`BcCsvImportCore` をベースとして実案件向けのインポートプラグインを作成するための手順書です。
 同梱プラグインとして `BcCsvImportSampleProducts`、`BcCsvImportSampleOrders`、`BcCsvImportSampleOrderDetails`、`BcCsvImportBlogPosts` が用意されています。
 
+実作業の詳細手順はこの文書に集約し、共通パターンの一覧やチェックリストは `derived-plugin.md` に分離しています。
+
 ## 方針
 
 実アプリケーション向けに作る方法は大きく 2 つあります。
@@ -543,8 +545,91 @@ ORD-0002,佐藤花子,3000,new,2026-04-01 10:10:00
 
 - プラグイン名と管理メニュー名の変更
 - `config.php` のタイトル・説明更新
-- `permission.php` の権限名更新
+- `config/permission.php` の権限名・URLを専用化する（後述）
 - 必要なら管理画面 URL や controller 名を専用化
+
+### config/permission.php の作り方
+
+各プラグイン固有のエンドポイントに権限定義を入れます。
+`BcCsvImportCore` の `permission.php` をコピーして、URL とキー名をプラグインに合わせて書き換えるのが最も簡単です。
+
+```php
+<?php
+// MyPlugin/config/permission.php
+return [
+    'permission' => [
+
+        'MyOrdersCsvImportsAdmin' => [
+            'title' => __d('baser_core', '受注CSVインポート管理'),
+            'plugin' => 'MyPlugin',
+            'type' => 'Admin',
+            'items' => [
+                'Index' => [
+                    'title' => __d('baser_core', 'CSVアップロード画面'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/index',
+                    'method' => 'GET',
+                    'auth' => true,
+                ],
+                'Upload' => [
+                    'title' => __d('baser_core', 'CSVアップロード'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/upload',
+                    'method' => 'POST',
+                    'auth' => true,
+                ],
+                'ValidateBatch' => [
+                    'title' => __d('baser_core', 'バリデーションバッチ'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/validate_batch',
+                    'method' => 'POST',
+                    'auth' => true,
+                ],
+                'ProcessBatch' => [
+                    'title' => __d('baser_core', '登録バッチ'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/process_batch',
+                    'method' => 'POST',
+                    'auth' => true,
+                ],
+                'Status' => [
+                    'title' => __d('baser_core', '進捗確認'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/status/*',
+                    'method' => 'GET',
+                    'auth' => true,
+                ],
+                'Cancel' => [
+                    'title' => __d('baser_core', 'キャンセル'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/cancel/*',
+                    'method' => 'POST',
+                    'auth' => true,
+                ],
+                'Delete' => [
+                    'title' => __d('baser_core', 'ジョブ削除'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/delete/*',
+                    'method' => 'POST',
+                    'auth' => true,
+                ],
+                'DownloadTemplate' => [
+                    'title' => __d('baser_core', 'テンプレートCSVダウンロード'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/download_template',
+                    'method' => 'GET',
+                    'auth' => true,
+                ],
+                'DownloadErrors' => [
+                    'title' => __d('baser_core', 'エラーCSVダウンロード'),
+                    'url' => '/baser/admin/my-plugin/orders_csv_imports/download_errors/*',
+                    'method' => 'GET',
+                    'auth' => true,
+                ],
+            ],
+        ],
+
+    ],
+];
+```
+
+チェックリスト:
+
+- 権限キー（`MyOrdersCsvImportsAdmin`）はプラグイン間で重複しない名前にする
+- URL の `/my-plugin/orders_csv_imports/` 部分をプラグインのルーティングに合わせる
+- 独自アクションを追加した場合（例: `download_posts`）は対応する `items` エントリを追加する
 
 ## 実務上の推奨
 
