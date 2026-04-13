@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace BcCsvImportCore;
 
 use BaserCore\BcPlugin;
+use BcCsvImportCore\Command\CleanupCommand;
 use BcCsvImportCore\ServiceProvider\BcCsvImportCoreServiceProvider;
+use Cake\Console\CommandCollection;
 use Cake\Core\ContainerInterface;
 use Cake\Core\PluginApplicationInterface;
 use Cake\Log\Log;
@@ -42,6 +44,18 @@ class BcCsvImportCorePlugin extends BcPlugin
         if (!is_dir($tmpDir)) {
             mkdir($tmpDir, 0777, true);
         }
+    }
+
+    /**
+     * console
+     *
+     * @param CommandCollection $commands
+     * @return CommandCollection
+     */
+    public function console(CommandCollection $commands): CommandCollection
+    {
+        $commands->add('BcCsvImportCore.cleanup', CleanupCommand::class);
+        return $commands;
     }
 
     /**
